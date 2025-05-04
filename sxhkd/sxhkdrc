@@ -157,8 +157,12 @@ super + shift + {h,j,k,l}
 
 # move a floating window
 # TODO: Вызывает конфликт с другими комбинациями 
-super + z + {h,j,k,l}
-	
+ctrl + {a,s,w,d}
+	bspc node -v {-30 0,0 30,0 -30,30 0}
+
+ctrl + {q,e,z,c}
+        bspc node -v {-20 -20,20 -20,-20  20,20  20}
+
 # set the node flags
 super + ctrl + {m,x,y,z}
 	bspc node -g {marked,locked,sticky,private}
