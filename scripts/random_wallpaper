@@ -1,3 +1,4 @@
 #!/bin/bash
 
-feh --randomize --no-fehbg --bg-fill ~/Wallpapers/
+# feh --randomize --no-fehbg --bg-fill ~/Wallpapers/
+feh --bg-fill ~/Wallpapers/cat.jpg

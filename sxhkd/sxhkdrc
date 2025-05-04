@@ -30,6 +30,12 @@ super + {d,x}
 super + shift + {f,t,i,c}
 	{firefox,telegram-desktop,code,chromium}
 
+ctrl + shift + Escape
+	gnome-system-monitor
+# Start nekoray
+super + shift + n
+	/home/ebArch/nekoray-4.0.1-2024-12-12-linux-x64.AppImage
+
 # Select window to close
 ctrl + super + alt + k
 	{xkill}
@@ -38,18 +44,19 @@ ctrl + super + alt + k
 XF86AudioRaiseVolume
     sh ~/.config/scripts/volume --up
 
-X86AuidioLowerVolume
+XF86AudioLowerVolume
     sh ~/.config/scripts/volume --down
 
-X86AudioMute
+
+XF86AudioMute
     sh ~/.config/scripts/volume --toggle
 
 # Brightness controls
 XF86MonBrightnessUp
-    brightnessctl set +16
+    sh ~/.config/scripts/brightness.sh --up
 
 XF86MonBrightnessDown
-    brightnessctl set 16-
+    sh ~/.config/scripts/brightness.sh --down
 
 # screenshot
 Print
@@ -66,12 +73,15 @@ ctrl + shift + {q,r}
     bspc {quit,wm -r}
 
 # close and kill
-super + c
+super + q
     bspc node -c
 
+super + shift + q
+    bspc node -k
+
 # alternate between the tiled and monocle layout
-super + space
-	bspc node -t "~"{floating,tiled}
+# super + space
+# 	bspc node -t "~"{floating,tiled}
 
 
 #
@@ -80,8 +90,12 @@ super + space
 
 # set the window state
 super + {t,ctrl + t,f}
-	bspc node -t {tiled,pseudo_tiled,fullscreen}
-	
+	bspc node -t {tiled,pseudo_tiled,fullscreen,floating}
+
+# set floating window
+super + space
+	bspc node -t "~"{floating,tiled}
+
 
 # Change focus to next window, including floating window
 alt + {_,shift + }Tab
@@ -109,8 +123,8 @@ super + shift + {1-9}
 #
 
 # preselect the ratio
-super + ctrl + {1-9}
-	bspc node -o 0.{1-9}
+# super + ctrl + {1-9}
+# 	bspc node -o 0.{1-9}
 
 # cancel the preselection for the focused node
 super + ctrl + space
@@ -125,18 +139,26 @@ super + ctrl + shift + space
 #
 
 # Expanding windows
-super + control {h,j,k,l}
-    bspc node -z {left -20 0,right 20 0,top 0 -20,bottom 0 20} 
+super + control + {h,j,k,l}
+    bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0} 
+
+super + shift + control + {h,j,k,l}
+    bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0} 
 
 # Send the window to another edge of the screen
-super + {_,alt + }{h,j,k,l}
-    bspc node -{f,s} {west,south,north,east}
+super + {h,j,k,l}
+    bspc node -f {west,south,north,east}
+
+super + alt + {h,j,k,l}
+    bspc node -s {west,south,north,east}
+
+super + shift + {h,j,k,l}
+    bspc node -v {west,south,north,east}
 
 # move a floating window
 # TODO: Вызывает конфликт с другими комбинациями 
-#super + x + {h,j,k,l}
-# 	bspc node -v {-20 0,0 20,0 -20,20 0}
-
+super + z + {h,j,k,l}
+	
 # set the node flags
 super + ctrl + {m,x,y,z}
 	bspc node -g {marked,locked,sticky,private}

@@ -13,12 +13,15 @@ get_volume() {
   fi
 }
 
+volume=$(get_volume)
 
 # Function to increase volume (using amixer)
 up_volume() {
   if command -v amixer &> /dev/null; then
     amixer set Master 2%+ unmute
-    dunstify -u low --replace=69 -i audio-volume-high "Volume: $(get_volume)%"
+    # dunstify -u low --replace=69 "Volume: $(get_volume)%"
+    volume=$(amixer get Master | grep -o -m 1 '[0-9]*%')
+    dunstify -u low --replace=69 -h "int:value:$volume" "Volume: $volume"
   else
     echo "ALSA (amixer) not found."
     exit 1
@@ -29,7 +32,9 @@ up_volume() {
 down_volume() {
   if command -v amixer &> /dev/null; then
     amixer set Master 2%- unmute
-    dunstify -u low --replace=69 -i audio-volume-high "Volume: $(get_volume)%"
+    # dunstify -u low --replace=69 "Volume: $(get_volume)%"
+    volume=$(amixer get Master | grep -o -m 1 '[0-9]*%')
+    dunstify -u low --replace=69 -h "int:value:$volume" "Volume: $volume"
   else
     echo "ALSA (amixer) not found."
     exit 1
@@ -41,10 +46,10 @@ toggle_mute() {
   if command -v amixer &> /dev/null; then
     amixer set Master toggle
     status=$(amixer get Master | grep "\[off\]" | awk '{print $NF}' | head -1)
-    if [[ "$status" == "[off]\n[off]" ]]; then
-      dunstify -u low --replace=69 -i audio-volume-muted "Mute"
+    if [[ "$status" == "[off]" ]]; then
+      dunstify -u low --replace=69 "Mute"
     else
-      dunstify -u low --replace=69 -i audio-volume-high "Unmute"
+      dunstify -u low --replace=69 "Unmute"
     fi
   else
     echo "ALSA (amixer) not found."

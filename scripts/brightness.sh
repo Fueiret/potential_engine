@@ -5,10 +5,10 @@ BRIGHTNESS_FILE="$BACKLIGHT_DIR/brightness"
 MAX_BRIGHTNESS_FILE="$BACKLIGHT_DIR/max_brightness"
 
 # Проверяем, что директория существует
-if [ ! -d "$BACKLIGHT_DIR" ]; then
-    echo "Backlight interface not found"
-    exit 1
-fi
+# if [ ! -d "$BACKLIGHT_DIR" ]; then
+#     echo "Backlight interface not found"
+#     exit 1
+#fi
 
 # Читаем текущую и максимальную яркость
 current_brightness=$(cat "$BRIGHTNESS_FILE")
@@ -17,7 +17,7 @@ max_brightness=$(cat "$MAX_BRIGHTNESS_FILE")
 # Функция для вывода яркости в процентах
 print_brightness() {
     percent=$(( 100 * current_brightness / max_brightness ))
-    echo " $percent%"
+    echo "$percent%"
 }
 
 # Функция для установки яркости (значение в абсолютных единицах)
@@ -36,29 +36,29 @@ set_brightness() {
 increase_brightness() {
     step=$(( max_brightness / 20 ))  # 5% от max
     new_brightness=$(( current_brightness + step ))
-    set_brightness $new_brightness
+    # set_brightness $new_brightness
+    brightnessctl set +16
+    brightness=$(print_brightness)
+    dunstify -u low --replace=69 -h "int:value:$brightness" "Brightness: $brightness"
 }
 
 # Уменьшить яркость на 5%
 decrease_brightness() {
-    step=$(( max_brightness / 20 ))  # 5% от max
-    new_brightness=$(( current_brightness - step ))
-    set_brightness $new_brightness
+    # step=$(( max_brightness / 20 ))  # 5% от max
+    #new_brightness=$(( current_brightness - step ))
+    # set_brightness $new_brightness
+    brightnessctl set 16-
+    brightness=$(print_brightness)
+    dunstify -u low --replace=69 -h "int:value:$brightness" "Brightness: $brightness"
 }
 
 # Основная логика
-case "$1" in
-    --get)
+if [[ "$1" == "--get" ]]; then
         print_brightness
-        ;;
-    --up)
+elif [[ "$1" == "--up" ]]; then
         increase_brightness
-        ;;
-    --down)
+elif [[ "$1" == "--down" ]]; then
         decrease_brightness
-        ;;
-    *)
+else
         print_brightness
-        ;;
-esac
-
+fi
