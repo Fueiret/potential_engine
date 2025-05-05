@@ -61,5 +61,5 @@ pgrep -x redshift > /dev/null || redshift &
 picom --config ~/.config/bspwm/picom_configurations/1.conf &
 
 # autostart
-flameshot &
-
+# flameshot &
+/home/ebArch/nekoray-4.0.1-2024-12-12-linux-x64.AppImage

@@ -27,8 +27,8 @@ super + {d,x}
     {rofi -show drun,sh ~/.config/scripts/powermenu}
 
 # Launch Applications
-super + shift + {f,t,i,c}
-	{firefox,telegram-desktop,code,chromium}
+super + shift + {f,t,c}
+	{firefox,telegram-desktop,codium}
 
 ctrl + shift + Escape
 	gnome-system-monitor
@@ -37,7 +37,7 @@ super + shift + n
 	/home/ebArch/nekoray-4.0.1-2024-12-12-linux-x64.AppImage
 
 # Select window to close
-ctrl + super + alt + k
+ctrl + super + alt + q
 	{xkill}
 
 # Volume controls
@@ -123,8 +123,6 @@ super + shift + {1-9}
 #
 
 # preselect the ratio
-# super + ctrl + {1-9}
-# 	bspc node -o 0.{1-9}
 
 # cancel the preselection for the focused node
 super + ctrl + space
@@ -157,11 +155,18 @@ super + shift + {h,j,k,l}
 
 # move a floating window
 # TODO: Вызывает конфликт с другими комбинациями 
-ctrl + {a,s,w,d}
+ctrl + alt + {a,s,w,d}
 	bspc node -v {-30 0,0 30,0 -30,30 0}
 
-ctrl + {q,e,z,c}
+ctrl + alt + {q,e,z,c}
         bspc node -v {-20 -20,20 -20,-20  20,20  20}
+
+# Preselect the ratio and direction
+super + ctrl + {1-9} 
+        bspc node -o 0.{1-9}
+
+super + ctrl + alt + {h,j,k,l}
+        bspc node -p {west,south,north,east}
 
 # set the node flags
 super + ctrl + {m,x,y,z}
