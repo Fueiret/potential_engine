@@ -34,12 +34,13 @@ set_brightness() {
 
 # Увеличить яркость на 5%
 increase_brightness() {
-    step=$(( max_brightness / 20 ))  # 5% от max
-    new_brightness=$(( current_brightness + step ))
+    # step=$(( max_brightness / 20 ))  # 5% от max
     # set_brightness $new_brightness
     brightnessctl set +16
-    brightness=$(print_brightness)
-    dunstify -u low --replace=69 -h "int:value:$brightness" "Brightness: $brightness"
+    brightness=$(brightnessctl get)
+    max_brightness=$(brightnessctl max)
+    current_brightness=$(( brightness * 100 / max_brightness))
+    dunstify -u low --replace=69 -h "int:value:$brightness" "Brightness: $current_brightness%"
 }
 
 # Уменьшить яркость на 5%
@@ -48,8 +49,10 @@ decrease_brightness() {
     #new_brightness=$(( current_brightness - step ))
     # set_brightness $new_brightness
     brightnessctl set 16-
-    brightness=$(print_brightness)
-    dunstify -u low --replace=69 -h "int:value:$brightness" "Brightness: $brightness"
+    brightness=$(brightnessctl get)
+    max_brightness=$(brightnessctl max)
+    current_brightness=$(( brightness * 100 / max_brightness))
+    dunstify -u low --replace=69 -h "int:value:$brightness" "Brightness: $current_brightness%"
 }
 
 # Основная логика

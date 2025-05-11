@@ -7,8 +7,12 @@ pgrep -x sxhkd > /dev/null || sxhkd &
 # wmname LG3D
 
 # workspaces
-bspc monitor primary -d 1 2 3 4 5 6 7
-bspc monitor LVDS-1 -d 7  # TODO: multiple monitors
+if [[ $(xrandr -q |grep 'HDMI-1 connected') ]]; then 
+    xrandr --output eDR-1 --primary --mode 1920x1080 --rotate mormal --output HDMI-1 --mode 1920x1080 --rotate normal --right-of eDP-1
+fi
+
+bspc monitor eDP-1 -d 1 2 3 4 5 6 7 # primary
+bspc monitor HDMI-1 -d 8 9 10  # TODO: multiple monitors
 
 bspc config focus_follows_pointer true
 70x100
