@@ -1,72 +1,84 @@
 #!/bin/bash
 
-# Script to Manage Speaker Volume with ALSA (amixer) and PulseAudio (pamixer)
+# PulseAudio Volume Control Script with Dunst Notifications
+# Features:
+# - Prevents volume > 100%
+# - Uses dunstify for notifications
+# - Mute/unmute toggle
+# - Volume up/down with 2% steps
 
-# Function to get volume level (using amixer for ALSA)
-get_volume() {
-  if command -v amixer &> /dev/null; then
-    volume=$(amixer get Master | grep '\[[0-9]+%\]' | awk -F'[][]' '{print $2}' | tr -d '%')
-    echo "$volume"
-  else
-    echo "ALSA (amixer) not found."
+# Check if PulseAudio is running
+if ! pactl info &>/dev/null; then
+    echo "PulseAudio not started!"
     exit 1
-  fi
-}
-
-volume=$(get_volume)
-
-# Function to increase volume (using amixer)
-up_volume() {
-  if command -v amixer &> /dev/null; then
-    amixer set Master 2%+ unmute
-    # dunstify -u low --replace=69 "Volume: $(get_volume)%"
-    volume=$(amixer get Master | grep -o -m 1 '[0-9]*%')
-    dunstify -u low --replace=69 -h "int:value:$volume" "Volume: $volume"
-  else
-    echo "ALSA (amixer) not found."
-    exit 1
-  fi
-}
-
-# Function to decrease volume (using amixer)
-down_volume() {
-  if command -v amixer &> /dev/null; then
-    amixer set Master 2%- unmute
-    # dunstify -u low --replace=69 "Volume: $(get_volume)%"
-    volume=$(amixer get Master | grep -o -m 1 '[0-9]*%')
-    dunstify -u low --replace=69 -h "int:value:$volume" "Volume: $volume"
-  else
-    echo "ALSA (amixer) not found."
-    exit 1
-  fi
-}
-
-# Function to toggle mute (using amixer)
-toggle_mute() {
-  if command -v amixer &> /dev/null; then
-    amixer set Master toggle
-    status=$(amixer get Master | grep "\[off\]" | awk '{print $NF}' | head -1)
-    if [[ "$status" == "[off]" ]]; then
-      dunstify -u low --replace=69 "Mute"
-    else
-      dunstify -u low --replace=69 "Unmute"
-    fi
-  else
-    echo "ALSA (amixer) not found."
-    exit 1
-  fi
-}
-
-# Execute actions based on arguments
-if [[ "$1" == "--get" ]]; then
-  get_volume
-elif [[ "$1" == "--up" ]]; then
-  up_volume
-elif [[ "$1" == "--down" ]]; then
-  down_volume
-elif [[ "$1" == "--toggle" ]]; then
-  toggle_mute
-else
-  get_volume
 fi
+
+# Check required commands
+for cmd in pactl dunstify; do
+    if ! command -v $cmd &>/dev/null; then
+        echo "Error: $cmd not found!"
+        exit 1
+    fi
+done
+
+# Get current volume (0-100)
+get_volume() {
+    pactl get-sink-volume @DEFAULT_SINK@ | awk -F'/' '{print $2}' | grep -o '[0-9]*%' | tr -d '%'
+}
+
+# Get mute status (returns "yes" or "no")
+get_mute() {
+    pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}'
+}
+
+# Show volume notification
+show_notification() {
+    local vol=$(get_volume)
+    local mute=$(get_mute)
+    
+    if [ "$mute" = "yes" ]; then
+        dunstify -u low -h string:x-dunst-stack-tag:volume -h int:value:"$vol" "Mute"
+    else
+        dunstify -u low -h string:x-dunst-stack-tag:volume -h int:value:"$vol" "Volume: $vol%"
+    fi
+}
+
+# Increase volume (cap at 100%)
+volume_up() {
+    local current=$(get_volume)
+    if [ "$current" -lt 100 ]; then
+        pactl set-sink-volume @DEFAULT_SINK@ +5%
+    	local vol=$(get_volume)
+        dunstify -u low -h string:x-dunst-stack-tag:volume -h int:value:"$vol" "Volume: $vol%"
+    else
+        pactl set-sink-volume @DEFAULT_SINK@ 100%
+    	local vol=$(get_volume)
+        dunstify -u low -h string:x-dunst-stack-tag:volume -h int:value:"$vol" "Volume: $vol%"
+    fi
+    # show_notification
+    dunstify -u low -h string:x-dunst-stack-tag:volume -h int:value:"$vol" "Volume: $vol%"
+}
+
+# Decrease volume
+volume_down() {
+    pactl set-sink-volume @DEFAULT_SINK@ -5%
+    local vol=$(get_volume)
+    # show_notification
+    dunstify -u low -h string:x-dunst-stack-tag:volume -h int:value:"$vol" "Volume: $vol%"
+}
+
+# Toggle mute
+toggle_mute() {
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
+    show_notification
+}
+
+# Handle arguments
+case "$1" in
+    --up) volume_up ;;
+    --down) volume_down ;;
+    --toggle) toggle_mute ;;
+    --get) get_volume ;;
+    *) echo "Use it $0 [up|down|mute|get]" ;;
+esac
 
